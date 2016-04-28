@@ -123,8 +123,8 @@ class NN: #Neural Network
         for i in range(self.numInputs):
             o_a = self.prevHiddenActivations[i]
             o_b = self.hiddenActivations[i]
-            foor j in range(self.numHidden):
-                self.weightsInput[i][j] = self.weightsInput[i][j] + alpha*(self.prevHiddenOutput[j]*o_a - self.hiddenOutput[j]*o_b)
+            for j in range(self.numHidden):
+                self.weightsInput[i][j] = self.weightsInput[i][j] + alpha*(self.prevDeltaHidden[j]*o_a - self.deltaHidden[j]*o_b)
         
         ### MARIANNAS CODE STOP ###
 
