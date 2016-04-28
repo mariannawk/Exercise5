@@ -86,12 +86,47 @@ class NN: #Neural Network
 
     def computeOutputDelta(self):
         #TODO: Implement the delta function for the output layer (see exercise text)
+        ### MARIANNAS CODE START ###
+        # a is fed in first and hence previous
+        o_a = self.prevOutputActivation
+        o_b = self.outputActivation
+        
+        p = 1/(1+exp(o_b - o_a))
+
+        self.prevDeltaOutput = logFuncDerivative(o_a)*(1-p)
+        self.deltaOutput = logFuncDerivative(o_b)*(1-p))        
+        ### MARIANNAS CODE STOP ###
 
     def computeHiddenDelta(self):
         #TODO: Implement the delta function for the hidden layer (see exercise text)
+        ### MARIANNAS CODE START ###
+        diff = self.prevDeltaOutput - self.deltaOutput
+
+        for i in range(self.numHidden):
+            self.prevDeltaHidden[i] = logFuncDerivative(self.prevHiddenActivations[i])*self.weightsOutput[i]*diff
+            self.deltaHidden[i] = logFuncDerivative(self.hiddenActivations[i])*self.weightsOutput[i]*diff
+            
+        ### MARIANNAS CODE STOP ###
 
     def updateWeights(self):
+        alpha = self.learningRate
         #TODO: Update the weights of the network using the deltas (see exercise text)
+
+        ### MARIANNAS CODE START ###
+        # iterate over output weights:
+        o_a = self.prevOutputActivation
+        o_b = self.outputActivation
+        for i in range(self.numHidden):
+            self.weightsOutput[i] = self.weightsOutput[i] + alpha*(self.prevDeltaOutput[i]*o_a - self.deltaOutput[i]*o_b)
+    
+        # iterate over input weights:
+        for i in range(self.numInputs):
+            o_a = self.prevHiddenActivations[i]
+            o_b = self.hiddenActivations[i]
+            foor j in range(self.numHidden):
+                self.weightsInput[i][j] = self.weightsInput[i][j] + alpha*(self.prevHiddenOutput[j]*o_a - self.hiddenOutput[j]*o_b)
+        
+        ### MARIANNAS CODE STOP ###
 
     def backpropagate(self):
         self.computeOutputDelta()
@@ -115,6 +150,16 @@ class NN: #Neural Network
         #-Propagate B
         #-Backpropagate
 
+        ### MARIANNAS CODE START ###
+        for i in range(iterations):
+            for pair in patterns:
+                self.propagate(pair[0])
+                self.propagate(pair[1])
+                self.backpropagate()
+            errorRate = self.countMisorderedPairs(patterns)
+            # do something with the error rate, print/save/whatevs
+        ### MARIANNAS CODE STOP ###
+        
     def countMisorderedPairs(self, patterns):
         #TODO: Let the network classify all pairs of patterns. The highest output determines the winner.
         #for each pair, do
