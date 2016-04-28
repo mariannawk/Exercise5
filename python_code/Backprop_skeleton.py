@@ -153,7 +153,7 @@ class NN: #Neural Network
         ### MARIANNAS CODE START ###
         for i in range(iterations):
             for pair in patterns:
-                self.propagate(pair[0])
+                self.propagate(pair[0]) # returns stuff so might throw an error
                 self.propagate(pair[1])
                 self.backpropagate()
             errorRate = self.countMisorderedPairs(patterns)
@@ -171,4 +171,27 @@ class NN: #Neural Network
         #end of for
         #TODO: Calculate the ratio of correct answers:
         #errorRate = numMisses/(numRight+numMisses)
-        pass
+
+        ### MARIANANS CODE START ###
+        numRight = 0
+        numMisses = 0
+        for pair in patterns:
+            a = pair[0]
+            b = pair[1]
+            outA = propagate(a)
+            outB = propagate(b)
+            if outA > outB:
+                winner = a
+                loser = b
+            else:
+                winner = b
+                loser = a
+            if winner.rating > loser.rating:
+                numRight+=1
+            else:
+                numMisses+=1
+                
+        return numMisses/(numRight+numMisses)
+        ### MARIANNAS CODE STOP ###
+    
+        #pass
