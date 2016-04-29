@@ -86,7 +86,7 @@ class NN: #Neural Network
 
     def computeOutputDelta(self):
         #TODO: Implement the delta function for the output layer (see exercise text)
-        ### MARIANNAS CODE START ###
+        ### OUR CODE START ###
         # a is fed in first and hence previous
         o_a = self.prevOutputActivation
         o_b = self.outputActivation
@@ -95,24 +95,24 @@ class NN: #Neural Network
 
         self.prevDeltaOutput = logFuncDerivative(o_a)*(1-p)
         self.deltaOutput = logFuncDerivative(o_b)*(1-p)        
-        ### MARIANNAS CODE STOP ###
+        ### OUR CODE STOP ###
 
     def computeHiddenDelta(self):
         #TODO: Implement the delta function for the hidden layer (see exercise text)
-        ### MARIANNAS CODE START ###
+        ### OUR CODE START ###
         diff = self.prevDeltaOutput - self.deltaOutput
 
         for i in range(self.numHidden):
             self.prevDeltaHidden[i] = logFuncDerivative(self.prevHiddenActivations[i])*self.weightsOutput[i]*diff
             self.deltaHidden[i] = logFuncDerivative(self.hiddenActivations[i])*self.weightsOutput[i]*diff
             
-        ### MARIANNAS CODE STOP ###
+        ### OUR CODE STOP ###
 
     def updateWeights(self):
         alpha = self.learningRate
         #TODO: Update the weights of the network using the deltas (see exercise text)
 
-        ### MARIANNAS CODE START ###
+        ### OUR CODE START ###
         #S: o_a og o_b er aktivasjonsnivået til noden vi går fra.
         #Så den skal være input activation på input-hidden, og
         #hidden på hidden-output
@@ -131,7 +131,7 @@ class NN: #Neural Network
                 
                 self.weightsInput[i][j] += alpha*(self.prevDeltaHidden[j]*o_a - self.deltaHidden[j]*o_b)
         
-        ### MARIANNAS CODE STOP ###
+        ### OUR CODE STOP ###
 
     def backpropagate(self):
         self.computeOutputDelta()
@@ -155,9 +155,8 @@ class NN: #Neural Network
         #-Propagate B
         #-Backpropagate
 
-        ### SVERRES CODE START ###
+        ### OUR CODE START ###
         errorLog = []
-        ### MARIANNAS CODE START ###
         for i in range(iterations):
             for pair in patterns:
                 self.propagate(pair[0]) # returns stuff so might throw an error
@@ -165,9 +164,9 @@ class NN: #Neural Network
                 self.backpropagate()
             errorRate = self.countMisorderedPairs(patterns)
             errorLog.append(errorRate)
-        ### MARIANNAS CODE STOP ###
+
         return errorLog
-        ### SVERRES CODE STOP ###
+        ### OUR CODE STOP ###
         
     def countMisorderedPairs(self, patterns):
         #TODO: Let the network classify all pairs of patterns. The highest output determines the winner.
@@ -181,31 +180,19 @@ class NN: #Neural Network
         #TODO: Calculate the ratio of correct answers:
         #errorRate = numMisses/(numRight+numMisses)
 
-        ### MARIANANS CODE START ###
-        #a og b er kun features, ikke hele objektet.
-        #Men vi sender dem inn sortert, a er bedre enn b
-        #så om outA er størst var det rett
+        ### OUR CODE START ###
+        # a and b are features only, fed in without rating
+        # they are fed in such that a is better than b
         numRight = 0
         numMisses = 0
         for pair in patterns:
-            a = pair[0]
-            b = pair[1]
-            outA = self.propagate(a)
-            outB = self.propagate(b)
+            outA = self.propagate(pair[0])
+            outB = self.propagate(pair[1])
             if outA > outB:
                 numRight+=1
-                #winner = a
-                #loser = b
             else:
                 numMisses+=1
-                #winner = b
-                #loser = a
-            #if winner.rating > loser.rating:
-                #numRight+=1
-            #else:
-                #numMisses+=1
+
                 
         return numMisses/(numRight+numMisses)
-        ### MARIANNAS CODE STOP ###
-    
-        #pass
+        ### OUR CODE STOP ###
