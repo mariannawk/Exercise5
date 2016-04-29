@@ -48,7 +48,6 @@ class dataHolder:
 
 def runRanker(trainingset, testset):
     #TODO: Insert the code for training and testing your ranker here.
-    # M: Like, HERE ??????
     #Dataholders for training and testset
     dhTraining = dataHolder(trainingset)
     dhTesting = dataHolder(testset)
@@ -70,9 +69,10 @@ def runRanker(trainingset, testset):
         #is to sort the instances based on their rating for this query.
         #(sort by x.rating for each x in dataInstance)
         
-        # M: sorter, iterer over, for hvert element iterer videre og legg til alle par med ulik rating
-        ### MARIANNAS CODE START ###
-        dataInstanceSorted = sorted(dataInstance, key=lambda x: x.rating) #S: Sorterer denne største først?
+        
+        ### OUR CODE START ###
+        #sort, iterate, for each element iterate over rest, append all pairs with distinct rating
+        dataInstanceSorted = sorted(dataInstance, key=lambda x: x.rating, reverse=True)
         n = len(dataInstanceSorted)
         for i in range(n):
             elem1 = dataInstanceSorted[i]
@@ -80,7 +80,7 @@ def runRanker(trainingset, testset):
                 elem2 = dataInstanceSorted[j]
                 if elem1.rating != elem2.rating:
                     trainingPatterns.append((elem1.features, elem2.features))                
-        ### MARIANNAS CODE STOP ###
+        ### OUR CODE STOP ###
 
     for qid in dhTesting.dataset.keys():
         #This iterates through every query ID in our test set
@@ -89,9 +89,9 @@ def runRanker(trainingset, testset):
         #TODO: Hint: The testing will be easier for you if you also now order the pairs
         #- it will make it easy to see if the ANN agrees with your ordering.
 
-        # M: samme som over ????
-        ### MARIANNAS CODE START ###
-        dataInstanceSorted = sorted(dataInstance, key=lambda x: x.rating)
+    
+        ### OUR CODE START ###
+        dataInstanceSorted = sorted(dataInstance, key=lambda x: x.rating, reverse=True)
         n = len(dataInstanceSorted)
         for i in range(n):
             elem1 = dataInstanceSorted[i]
@@ -99,9 +99,7 @@ def runRanker(trainingset, testset):
                 elem2 = dataInstanceSorted[j]
                 if elem1.rating != elem2.rating:
                     testPatterns.append((elem1.features, elem2.features))                 
-        ### MARIANNAS CODE STOP ###
 
-    ### SVERRES CODE START ###
     iterations = 1
     errorRateTraining = []
     errorRateTesting = []
@@ -150,6 +148,7 @@ def runRanker(trainingset, testset):
     for item in nn.weightsOutput:
         file.write("%s\n" % item)
     file.close()
-    ### SVERRES CODE STOP ###
+    
+    ### OUR CODE STOP ###
 
 runRanker("train.txt","test.txt")
