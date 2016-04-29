@@ -28,7 +28,7 @@ class NN: #Neural Network
         self.numHidden = numHidden
 
         # Current activation levels for nodes (in other words, the nodes' output value)
-        self.inputActivation = [1.0]*self.numInputs
+        self.inputActivations = [1.0]*self.numInputs
         self.hiddenActivations = [1.0]*self.numHidden
         self.outputActivation = 1.0 #Assuming a single output.
         self.learningRate = learningRate
@@ -62,10 +62,10 @@ class NN: #Neural Network
             raise ValueError('wrong number of inputs')
 
         # input activations
-        self.prevInputActivations=copy.deepcopy(self.inputActivation)
+        self.prevInputActivations=copy.deepcopy(self.inputActivations)
         for i in range(self.numInputs-1):
-            self.inputActivation[i] = inputs[i]
-        self.inputActivation[-1] = 1 #Set bias node to -1.
+            self.inputActivations[i] = inputs[i]
+        self.inputActivations[-1] = 1 #Set bias node to -1.
 
         # hidden activations
         self.prevHiddenActivations=copy.deepcopy(self.hiddenActivations)
@@ -73,7 +73,7 @@ class NN: #Neural Network
             sum = 0.0
             for i in range(self.numInputs):
                 #print self.ai[i] ," * " , self.wi[i][j]
-                sum = sum + self.inputActivation[i] * self.weightsInput[i][j]
+                sum = sum + self.inputActivations[i] * self.weightsInput[i][j]
             self.hiddenActivations[j] = logFunc(sum)
 
         # output activations
@@ -91,10 +91,10 @@ class NN: #Neural Network
         o_a = self.prevOutputActivation
         o_b = self.outputActivation
         
-        p = 1/(1+exp(o_b - o_a))
+        p = 1/(1+math.exp(o_b - o_a))
 
         self.prevDeltaOutput = logFuncDerivative(o_a)*(1-p)
-        self.deltaOutput = logFuncDerivative(o_b)*(1-p))        
+        self.deltaOutput = logFuncDerivative(o_b)*(1-p)        
         ### MARIANNAS CODE STOP ###
 
     def computeHiddenDelta(self):
@@ -113,18 +113,23 @@ class NN: #Neural Network
         #TODO: Update the weights of the network using the deltas (see exercise text)
 
         ### MARIANNAS CODE START ###
+        #S: o_a og o_b er aktivasjonsnivået til noden vi går fra.
+        #Så den skal være input activation på input-hidden, og
+        #hidden på hidden-output
         # iterate over output weights:
-        o_a = self.prevOutputActivation
-        o_b = self.outputActivation
         for i in range(self.numHidden):
-            self.weightsOutput[i] = self.weightsOutput[i] + alpha*(self.prevDeltaOutput[i]*o_a - self.deltaOutput[i]*o_b)
-    
-        # iterate over input weights:
-        for i in range(self.numInputs):
             o_a = self.prevHiddenActivations[i]
             o_b = self.hiddenActivations[i]
+            self.weightsOutput[i] += alpha*(self.prevDeltaOutput*o_a - self.deltaOutput*o_b)
+
+        
+        # iterate over input weights:
+        for i in range(self.numInputs):
+            o_a = self.prevInputActivations[i]
+            o_b = self.inputActivations[i]
             for j in range(self.numHidden):
-                self.weightsInput[i][j] = self.weightsInput[i][j] + alpha*(self.prevDeltaHidden[j]*o_a - self.deltaHidden[j]*o_b)
+                
+                self.weightsInput[i][j] += alpha*(self.prevDeltaHidden[j]*o_a - self.deltaHidden[j]*o_b)
         
         ### MARIANNAS CODE STOP ###
 
@@ -150,6 +155,8 @@ class NN: #Neural Network
         #-Propagate B
         #-Backpropagate
 
+        ### SVERRES CODE START ###
+        errorLog = []
         ### MARIANNAS CODE START ###
         for i in range(iterations):
             for pair in patterns:
@@ -157,8 +164,10 @@ class NN: #Neural Network
                 self.propagate(pair[1])
                 self.backpropagate()
             errorRate = self.countMisorderedPairs(patterns)
-            # do something with the error rate, print/save/whatevs
+            errorLog.append(errorRate)
         ### MARIANNAS CODE STOP ###
+        return errorLog
+        ### SVERRES CODE STOP ###
         
     def countMisorderedPairs(self, patterns):
         #TODO: Let the network classify all pairs of patterns. The highest output determines the winner.
@@ -173,23 +182,28 @@ class NN: #Neural Network
         #errorRate = numMisses/(numRight+numMisses)
 
         ### MARIANANS CODE START ###
+        #a og b er kun features, ikke hele objektet.
+        #Men vi sender dem inn sortert, a er bedre enn b
+        #så om outA er størst var det rett
         numRight = 0
         numMisses = 0
         for pair in patterns:
             a = pair[0]
             b = pair[1]
-            outA = propagate(a)
-            outB = propagate(b)
+            outA = self.propagate(a)
+            outB = self.propagate(b)
             if outA > outB:
-                winner = a
-                loser = b
-            else:
-                winner = b
-                loser = a
-            if winner.rating > loser.rating:
                 numRight+=1
+                #winner = a
+                #loser = b
             else:
                 numMisses+=1
+                #winner = b
+                #loser = a
+            #if winner.rating > loser.rating:
+                #numRight+=1
+            #else:
+                #numMisses+=1
                 
         return numMisses/(numRight+numMisses)
         ### MARIANNAS CODE STOP ###

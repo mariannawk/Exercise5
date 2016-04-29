@@ -1,6 +1,7 @@
 __author__ = 'kaiolae'
 __author__ = 'kaiolae'
 import Backprop_skeleton as Bp
+#import matplotlib.pyplot as plt
 
 #Class for holding your data - one object for each line in the dataset
 class dataInstance:
@@ -71,14 +72,14 @@ def runRanker(trainingset, testset):
         
         # M: sorter, iterer over, for hvert element iterer videre og legg til alle par med ulik rating
         ### MARIANNAS CODE START ###
-        dataInstanceSorted = sorted(dataInstance, key=lambda x: x.rating)
+        dataInstanceSorted = sorted(dataInstance, key=lambda x: x.rating) #S: Sorterer denne største først?
         n = len(dataInstanceSorted)
         for i in range(n):
             elem1 = dataInstanceSorted[i]
-                for j in range(i+1, n):
-                    elem2 = dataInstanceSorted[j]
-                    if elem1.rating != elem2.rating:
-                        trainingPatterns.append((elem1.features, elem2.features))                
+            for j in range(i+1, n):
+                elem2 = dataInstanceSorted[j]
+                if elem1.rating != elem2.rating:
+                    trainingPatterns.append((elem1.features, elem2.features))                
         ### MARIANNAS CODE STOP ###
 
     for qid in dhTesting.dataset.keys():
@@ -94,24 +95,61 @@ def runRanker(trainingset, testset):
         n = len(dataInstanceSorted)
         for i in range(n):
             elem1 = dataInstanceSorted[i]
-                for j in range(i+1, n):
-                    elem2 = dataInstanceSorted[j]
-                    if elem1.rating != elem2.rating:
-                        testPatterns.append((elem1.features, elem2.features))                 
+            for j in range(i+1, n):
+                elem2 = dataInstanceSorted[j]
+                if elem1.rating != elem2.rating:
+                    testPatterns.append((elem1.features, elem2.features))                 
         ### MARIANNAS CODE STOP ###
 
+    ### SVERRES CODE START ###
+    iterations = 1
+    errorRateTraining = []
+    errorRateTesting = []
+
     #Check ANN performance before training
-    nn.countMisorderedPairs(testPatterns)
+    errorRateTesting.append(nn.countMisorderedPairs(testPatterns))
     for i in range(25):
+        print("Starting itteration ", i)
         #Running 25 iterations, measuring testing performance after each round of training.
         #Training
-        nn.train(trainingPatterns,iterations=1)
+        errorRateTraining.extend(nn.train(trainingPatterns,iterations))
+        
         #Check ANN performance after training.
-        nn.countMisorderedPairs(testPatterns)
+        errorRateTesting.append(nn.countMisorderedPairs(testPatterns))
 
     #TODO: Store the data returned by countMisorderedPairs and plot it,
     #showing how training and testing errors develop.
 
+    #plt.plot(errorRateTraining)
+    #plt.ylabel("Error rate trining")
+    #plt.show()
 
+    #plt.plot(errorRateTesting)
+    #plt.ylabel("Error rate testing")
+    #plt.show()
+
+
+    file = open("errorRateTraining.txt", "w")
+    for item in errorRateTraining:
+      file.write("%s\n" % item)
+    file.close()
+
+    file = open("errorRateTesting.txt","w")
+    for item in errorRateTesting:
+      file.write("%s\n" % item)
+    file.close()
+
+    file = open("NNweightsInput.txt","w")
+    for lines in nn.weightsInput:
+        for item in lines:
+          file.write("%s " % item)
+        file.write("\n")
+    file.close()
+
+    file = open("NNweightsOutput.txt","w")
+    for item in nn.weightsOutput:
+        file.write("%s\n" % item)
+    file.close()
+    ### SVERRES CODE STOP ###
 
 runRanker("train.txt","test.txt")
